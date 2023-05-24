@@ -97,4 +97,88 @@ router.route('/createaccount').post(async function (req, res) {
   }
 });
 
+router.route('/:_id').get(async function getUserbyId(req, res) {
+  const { _id } = req.params; //get parameter
+  try {
+    if (!_id) return res.status(501).send({ error: 'invalid id' });
+    const user = await User.findOne({ _id: _id });
+    if (!user) return res.status(500).send('error not found user');
+
+    const { password, ...rest } = user.toJSON();
+    return res.status(201).send(rest);
+  } catch (error) {
+    return res.status(409).send({ error: 'can not find user data' });
+  }
+});
+router.route('/updateuser').put(async function updateUser(req, res) {
+  try {
+    const { _id } = req.body;
+    const user = req.body.user;
+    console.log(_id);
+    const { email, phone } = user;
+    const existEmail = new Promise(async function (resolve, reject) {
+      const emailexist = await User.findOne({ email });
+
+      if (emailexist) reject('Email already exists');
+
+      resolve();
+    });
+
+    const existPhone = new Promise(async function (resolve, reject) {
+      const phoneexist = await User.findOne({ phone });
+
+      if (phoneexist) reject('Phone already exists');
+
+      resolve();
+    });
+    Promise.all([existEmail, existPhone])
+      .then(async () => {
+        const body = req.body.user;
+
+        const foundUser = await User.findOne({ _id });
+        if (!foundUser) return res.status(404).send('User not found');
+        const update = await User.updateOne({ _id: _id }, body);
+        console.log(update);
+
+        if (update) return res.status(200).send('User Updated');
+        else return res.status(501).send({ error });
+      })
+      .catch(function (error) {
+        console.log(error);
+        if (error === 'Email already exists') {
+          return res.status(201).send('Email exist');
+        } else if (error === 'Phone already exists') {
+          return res.status(202).send('Phone exist');
+        }
+      });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).send({ error });
+    // .then(function () {
+    //   bcrypt.hash(password, 10).then(async function (hashedPassword) {
+    //     const newUser = await User.create({
+    //       name,
+    //       email,
+    //       phone,
+    //       password: hashedPassword,
+    //     })
+    //       .then(function () {
+    //         res.status(200).send({ success: true });
+    //       })
+    //       .catch(function (error) {
+    //         console.log(hashedPassword);
+    //         console.log(error);
+    //         res.status(500).send(error);
+    //       });
+    //   });
+    // })
+    // .catch(function (error) {
+    //   if (error === 'Email already exists') {
+    //     return res.status(201).send('Email exist');
+    //   } else if (error === 'Phone already exists') {
+    //     return res.status(202).send('Phone exist');
+    //   }
+    // });
+  }
+});
 export default router;
