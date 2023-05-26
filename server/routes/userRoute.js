@@ -16,9 +16,7 @@ router.route('/login').post(async function (req, res) {
     const user = await User.findOne({ email: email });
     if (!user) return res.status(500).send('error');
     console.log(user.password);
-    bcrypt.hash(password, 10).then(function (hashedPassword) {
-      console.log(hashedPassword);
-    });
+
     bcrypt
       .compare(password, user.password)
       .then(function (passwordCheck) {
@@ -114,12 +112,15 @@ router.route('/updateuser').put(async function updateUser(req, res) {
   try {
     const { _id } = req.body;
     const user = req.body.user;
-    console.log(_id);
-    const { email, phone } = user;
+    const foundUser = await User.findOne({ _id });
+
+    // const update = await User.updateOne({ _id: _id }, body);
+    const { email, phone, name } = user;
     const existEmail = new Promise(async function (resolve, reject) {
       const emailexist = await User.findOne({ email });
 
-      if (emailexist) reject('Email already exists');
+      if (emailexist && emailexist.email != foundUser.email)
+        reject('Email already exists');
 
       resolve();
     });
@@ -127,7 +128,8 @@ router.route('/updateuser').put(async function updateUser(req, res) {
     const existPhone = new Promise(async function (resolve, reject) {
       const phoneexist = await User.findOne({ phone });
 
-      if (phoneexist) reject('Phone already exists');
+      if (phoneexist && phoneexist.phone != foundUser.phone)
+        reject('Phone already exists');
 
       resolve();
     });
@@ -179,6 +181,38 @@ router.route('/updateuser').put(async function updateUser(req, res) {
     //     return res.status(202).send('Phone exist');
     //   }
     // });
+  }
+});
+
+router.route('/changepassword').put(async function updateUser(req, res) {
+  try {
+    const { _id } = req.body;
+    const user = req.body.user;
+    console.log(_id);
+    // const update = await User.updateOne({ _id: _id }, body);
+    const password = user.password;
+    const newPassword = user.newPassword;
+
+    const body = req.body.user;
+
+    const foundUser = await User.findOne({ _id });
+    if (!foundUser) return res.status(405).send('User not found');
+    bcrypt.compare(password, foundUser.password).then(function (check) {
+      if (!check) return res.status(203).send('Password not correct');
+      else {
+        bcrypt.hash(newPassword, 10).then(async function (hashedPassword) {
+          const update = await User.updateOne(
+            { _id: _id },
+            { password: hashedPassword }
+          );
+          if (update) return res.status(200).send('User Updated');
+          else return res.status(501).send({ error });
+        });
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(503).send({ error });
   }
 });
 export default router;

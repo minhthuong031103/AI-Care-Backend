@@ -30,16 +30,33 @@ router.route('/history').post(async function (req, res) {
 router.route('/chatgpt/confide').post(async function (req, res) {
   try {
     const { message, userID } = req.body;
+
     const history = await HistoryModel.findOne({ user: userID });
     console.log('chua loi');
     let messages = [];
     if (history) {
       const { _id, ...messagesObject } = history.messages;
       messages = Object.values(messagesObject);
-      messages.push({
-        role: 'user',
-        content: message,
-      });
+      //Lay 6 cau cuoi
+      messages = messages.slice(-6);
+
+      // Lay 3 cau dau 3 cau cuoi
+      // const firstThreeMessages = messages.slice(0, 3);
+
+      // const lastThreeMessages = messages.slice(-3);
+      // messages = firstThreeMessages.concat(lastThreeMessages);
+
+      messages.push(
+        {
+          role: 'system',
+          content:
+            'Bạn là một nhà chuyên gia tư vấn tâm lý, không phải là một trợ lý ảo, bạn sẽ giúp đỡ tôi về vấn đề tâm lý, bạn có thể ghi nhớ tên tôi và các câu chuyện để đưa ra lời khuyên.',
+        },
+        {
+          role: 'user',
+          content: '' + message,
+        }
+      );
       console.log('messages sau khi lay ve tu db \n');
       console.log(messages);
     } else {
@@ -47,12 +64,12 @@ router.route('/chatgpt/confide').post(async function (req, res) {
         {
           role: 'system',
           content:
-            'Bạn là một nhà chuyên gia tư vấn tâm lý, bạn sẽ giúp đỡ tôi về vấn đề tâm lý.',
+            'Bạn là một nhà chuyên gia tư vấn tâm lý, không phải là một trợ lý ảo, bạn sẽ giúp đỡ tôi về vấn đề tâm lý, bạn có thể ghi nhớ tên tôi và các câu chuyện để đưa ra lời khuyên.',
         },
         {
           role: 'user',
           content:
-            'Xin chào tôi đang tìm kiếm lời khuyên về tư vấn tâm lý. Hãy tư vấn tâm lý cho tôi dưới góc độ của một chuyên gia tâm lý. Bạn có thể hỏi lại tôi để làm rõ về vấn đề tôi cần tư vấn tâm lý nếu như bạn không hiểu rõ' +
+            'Xin chào tôi tên là Thường, (xin hãy ghi nhớ tên tôi là Thường) tôi đang tìm kiếm lời khuyên về tư vấn tâm lý. Hãy tư vấn tâm lý cho tôi dưới góc độ của một chuyên gia tâm lý. Bạn có thể hỏi lại tôi để làm rõ về vấn đề tôi cần tư vấn tâm lý nếu như bạn không hiểu rõ, Bạn là một nhà chuyên gia tư vấn tâm lý, không phải là một trợ lý ảo, bạn sẽ giúp đỡ tôi về vấn đề tâm lý, bạn có thể ghi nhớ tên tôi và các câu chuyện để đưa ra lời khuyên dưới góc độ của một chuyên gia tâm lý.' +
             message,
         }
       );
@@ -103,7 +120,7 @@ router.route('/chatgpt/confide').post(async function (req, res) {
       }
     }
   } catch (error) {
-    // console.log(error);
+    console.log(error);
     return res.status(505).send('loi');
   }
 });
