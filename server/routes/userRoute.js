@@ -2,9 +2,9 @@ import express from 'express';
 import * as dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import User from '../mongodb/models/user.js';
-
+import otpGenerator from 'otp-generator';
 import jwt from 'jsonwebtoken';
-
+import nodemailer from 'nodemailer';
 dotenv.config();
 
 const router = express.Router();
@@ -12,10 +12,9 @@ const router = express.Router();
 router.route('/login').post(async function (req, res) {
   try {
     const { email, password } = req.body;
-    console.log(email, password);
+
     const user = await User.findOne({ email: email });
     if (!user) return res.status(500).send('error');
-    console.log(user.password);
 
     bcrypt
       .compare(password, user.password)
@@ -213,6 +212,139 @@ router.route('/changepassword').put(async function updateUser(req, res) {
   } catch (error) {
     console.log(error);
     return res.status(503).send({ error });
+  }
+});
+//sendmail
+async function sendOTPtoEmail(email, otp) {
+  // create a nodemailer transporter using your SMTP credentials
+  let transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    auth: {
+      user: 'solokill2001@gmail.com', // your email address
+      pass: 'kwounewjdeubkbeo', // your email password
+    },
+  });
+
+  // send mail with defined transport object
+  let info = await transporter.sendMail({
+    from: 'solokill2001@gmail.com', // sender address
+    to: email, // list of receivers
+    subject: 'Mã xác nhận quên mật khẩu', // subject line
+
+    html: `
+    <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify your login</title>
+  <!--[if mso]><style type="text/css">body, table, td, a { font-family: Arial, Helvetica, sans-serif !important; }</style><![endif]-->
+</head>
+
+<body style="font-family: Helvetica, Arial, sans-serif; margin: 0px; padding: 0px; background-color: #ffffff;">
+  <table role="presentation"
+    style="width: 100%; border-collapse: collapse; border: 0px; border-spacing: 0px; font-family: Arial, Helvetica, sans-serif; background-color: rgb(239, 239, 239);">
+    <tbody>
+      <tr>
+        <td align="center" style="padding: 1rem 2rem; vertical-align: top; width: 100%;">
+          <table role="presentation" style="max-width: 600px; border-collapse: collapse; border: 0px; border-spacing: 0px; text-align: left;">
+            <tbody>
+              <tr>
+                <td style="padding: 40px 0px 0px;">
+                  <div style="text-align: left;">
+                    <div style="padding-bottom: 20px;"><img src="https://i.ibb.co/Qbnj4mz/logo.png" alt="Company" style="width: 56px;"></div>
+                  </div>
+                  <div style="padding: 20px; background-color: rgb(255, 255, 255);">
+                    <div style="color: rgb(0, 0, 0); text-align: left;">
+                      <h1 style="margin: 1rem 0">Mã OTP</h1>
+                      <p style="padding-bottom: 16px">Hãy sử dụng mã OTP bên dưới để đặt lại mật khẩu.</p>
+                      <p style="padding-bottom: 16px"><strong style="font-size: 130%">${otp}</strong></p>
+                      <p style="padding-bottom: 16px">Nếu bạn không gửi yêu cầu, hãy bỏ qua tin nhắn này.</p>
+                      <p style="padding-bottom: 16px">Xin cám ơn,<br>AI-Care.</p>
+                    </div>
+                  </div>
+                
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+    </tbody>
+  `,
+  });
+
+  console.log('Message sent: %s', info.messageId);
+}
+router.route('/forgot').post(async function (req, res) {
+  try {
+    const { email } = req.body;
+    console.log(email);
+    const user = await User.findOne({ email: email });
+    if (!user) return res.status(202).send('error');
+    else {
+      const OTP = await otpGenerator.generate(6, {
+        lowerCaseAlphabets: false,
+        upperCaseAlphabets: false,
+        specialChars: false,
+      });
+      if (!email) return res.status(501).send({ error: 'invalid email' });
+
+      const user = await User.findOne({ email });
+
+      if (!user)
+        return res.status(501).send({ error: 'could not find the user' });
+
+      user.otp = OTP;
+      const _id = user._id;
+
+      await User.updateOne({ _id: _id }, { otp: OTP });
+      await sendOTPtoEmail(email, OTP);
+
+      return res.status(201).send({ _id: _id });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ success: false, message: error });
+  }
+});
+router.route('/checkotp').post(async function (req, res) {
+  try {
+    const { otp, _id } = req.body;
+
+    const foundUser = await User.findOne({ _id: _id });
+    if (!foundUser) return res.status(202).send('error');
+    else {
+      if (otp === foundUser.otp) {
+        return res.status(201).send('ok');
+      } else {
+        return res.status(203).send('sai');
+      }
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ success: false, message: error });
+  }
+});
+router.route('/resetpassword').put(async function (req, res) {
+  try {
+    const { newPassword, _id } = req.body;
+
+    const foundUser = await User.findOne({ _id: _id });
+    if (!foundUser) return res.status(202).send('error');
+    else {
+      bcrypt.hash(newPassword, 10).then(async function (hashedPassword) {
+        const update = await User.updateOne(
+          { _id: _id },
+          { password: hashedPassword }
+        );
+        if (update) return res.status(201).send('User Updated');
+        else return res.status(501).send({ error });
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ success: false, message: error });
   }
 });
 export default router;

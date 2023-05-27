@@ -49,9 +49,20 @@ router.route('/schedule').post(async function (req, res) {
     if (!user) return res.status(501).send({ error: 'invalid date' });
 
     try {
-      confirmScheduleMail(email, doctorName, name, doctorEmail, phone, message);
-
-      return res.status(201).send('ok');
+      await confirmScheduleMail(
+        email,
+        doctorName,
+        name,
+        doctorEmail,
+        phone,
+        message
+      )
+        .then(function () {
+          return res.status(201).send('ok');
+        })
+        .catch(function (error) {
+          return res.status(504).send('failed');
+        });
     } catch (error) {
       return res.status(505).send({ error });
     }
