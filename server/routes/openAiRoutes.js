@@ -29,7 +29,7 @@ router.route('/history').post(async function (req, res) {
 
 router.route('/chatgpt/confide').post(async function (req, res) {
   try {
-    const { message, userID } = req.body;
+    const { message, userID, username } = req.body;
 
     const history = await HistoryModel.findOne({ user: userID });
     console.log('chua loi');
@@ -38,38 +38,31 @@ router.route('/chatgpt/confide').post(async function (req, res) {
       const { _id, ...messagesObject } = history.messages;
       messages = Object.values(messagesObject);
       //Lay 6 cau cuoi
-      messages = messages.slice(-6);
+      // messages = messages.slice(-6);
 
       // Lay 3 cau dau 3 cau cuoi
-      // const firstThreeMessages = messages.slice(0, 3);
+      const firstThreeMessages = messages.slice(0, 3);
 
-      // const lastThreeMessages = messages.slice(-3);
-      // messages = firstThreeMessages.concat(lastThreeMessages);
+      const lastThreeMessages = messages.slice(-3);
+      messages = firstThreeMessages.concat(lastThreeMessages);
 
-      messages.push(
-        {
-          role: 'system',
-          content:
-            'Bạn là một nhà chuyên gia tư vấn tâm lý, không phải là một trợ lý ảo, bạn sẽ giúp đỡ tôi về vấn đề tâm lý, bạn có thể ghi nhớ tên tôi và các câu chuyện để đưa ra lời khuyên.',
-        },
-        {
-          role: 'user',
-          content: '' + message,
-        }
-      );
+      messages.push({
+        role: 'user',
+        content: '' + message,
+      });
       console.log('messages sau khi lay ve tu db \n');
       console.log(messages);
     } else {
       messages.push(
         {
           role: 'system',
-          content:
-            'Bạn là một nhà chuyên gia tư vấn tâm lý, không phải là một trợ lý ảo, bạn sẽ giúp đỡ tôi về vấn đề tâm lý, bạn có thể ghi nhớ tên tôi và các câu chuyện để đưa ra lời khuyên.',
+          content: `Tôi tên là ${username}. Bạn tên là EmotiBot, một trợ lý ảo của nền tảng AI-Care và là một nhà chuyên gia tư vấn tâm lý, không phải là một trợ lý ảo, bạn sẽ giúp đỡ tôi về vấn đề tâm lý, bạn có thể ghi nhớ tên tôi và các câu chuyện để đưa ra lời khuyên.`,
         },
+
         {
           role: 'user',
           content:
-            'Xin chào tôi tên là Thường, (xin hãy ghi nhớ tên tôi là Thường) tôi đang tìm kiếm lời khuyên về tư vấn tâm lý. Hãy tư vấn tâm lý cho tôi dưới góc độ của một chuyên gia tâm lý. Bạn có thể hỏi lại tôi để làm rõ về vấn đề tôi cần tư vấn tâm lý nếu như bạn không hiểu rõ, Bạn là một nhà chuyên gia tư vấn tâm lý, không phải là một trợ lý ảo, bạn sẽ giúp đỡ tôi về vấn đề tâm lý, bạn có thể ghi nhớ tên tôi và các câu chuyện để đưa ra lời khuyên dưới góc độ của một chuyên gia tâm lý.' +
+            `Tôi tên là ${username} (hãy ghi nhớ tên của tôi, tên của bạn và nội dung tôi chia sẻ về sau và khi được hỏi những câu "Tôi tên là gì?/ Bạn còn nhớ tên tôi không?/ Bạn có biết tên tôi là gì không?" thì hãy chỉ trả lời "Tên của bạn là Tâm". Khi tôi hỏi "Tên của bạn là gì? Bạn tên gì? Bạn là ai?" hãy trả lời "Tôi là EmotiBot, một trợ lý ảo của nền tảng AI-Care"` +
             message,
         }
       );
