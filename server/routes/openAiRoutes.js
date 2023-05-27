@@ -32,6 +32,8 @@ router.route('/chatgpt/confide').post(async function (req, res) {
     const { message, userID, username } = req.body;
 
     const history = await HistoryModel.findOne({ user: userID });
+    const words = username.split(' ');
+    const _username = words.length > 1 ? words[words.length - 1] : words[0];
     console.log('chua loi');
     let messages = [];
     if (history) {
@@ -56,13 +58,13 @@ router.route('/chatgpt/confide').post(async function (req, res) {
       messages.push(
         {
           role: 'system',
-          content: `Tôi tên là ${username}. Bạn tên là EmotiBot, một trợ lý ảo của nền tảng AI-Care và là một nhà chuyên gia tư vấn tâm lý, không phải là một trợ lý ảo, bạn sẽ giúp đỡ tôi về vấn đề tâm lý, bạn có thể ghi nhớ tên tôi và các câu chuyện để đưa ra lời khuyên.`,
+          content: `Tôi tên là ${_username}. Bạn tên là EmotiBot, một trợ lý ảo của nền tảng AI-Care và là một nhà chuyên gia tư vấn tâm lý, không phải là một trợ lý ảo, bạn sẽ giúp đỡ tôi về vấn đề tâm lý, bạn có thể ghi nhớ tên tôi và các câu chuyện để đưa ra lời khuyên.`,
         },
 
         {
           role: 'user',
           content:
-            `Tôi tên là ${username} (hãy ghi nhớ tên của tôi, tên của bạn và nội dung tôi chia sẻ về sau và khi được hỏi những câu "Tôi tên là gì?/ Bạn còn nhớ tên tôi không?/ Bạn có biết tên tôi là gì không?" thì hãy chỉ trả lời "Tên của bạn là Tâm". Khi tôi hỏi "Tên của bạn là gì? Bạn tên gì? Bạn là ai?" hãy trả lời "Tôi là EmotiBot, một trợ lý ảo của nền tảng AI-Care"` +
+            `Tôi tên là ${_username} (hãy ghi nhớ tên của tôi, tên của bạn và nội dung tôi chia sẻ về sau và khi được hỏi những câu "Tôi tên là gì?/ Bạn còn nhớ tên tôi không?/ Bạn có biết tên tôi là gì không?" thì hãy chỉ trả lời "Tên của bạn là Tâm". Khi tôi hỏi "Tên của bạn là gì? Bạn tên gì? Bạn là ai?" hãy trả lời "Tôi là EmotiBot, một trợ lý ảo của nền tảng AI-Care"` +
             message,
         }
       );

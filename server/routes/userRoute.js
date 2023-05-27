@@ -31,6 +31,7 @@ router.route('/login').post(async function (req, res) {
         );
         return res.status(201).send({
           msg: 'Login Successfully',
+          username: user.name,
           _id: user._id,
           token,
         });
