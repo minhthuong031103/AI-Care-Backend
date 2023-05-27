@@ -2,6 +2,7 @@ import express from 'express';
 import * as dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import User from '../mongodb/models/user.js';
+import History from '../mongodb/models/historyModel.js';
 import otpGenerator from 'otp-generator';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
@@ -66,14 +67,42 @@ router.route('/createaccount').post(async function (req, res) {
     Promise.all([existEmail, existPhone])
       .then(function () {
         bcrypt.hash(password, 10).then(async function (hashedPassword) {
-          const newUser = await User.create({
+          const newUser = User.create({
             name,
             email,
             phone,
             password: hashedPassword,
-          })
-            .then(function () {
-              res.status(200).send({ success: true });
+          });
+          newUser
+            .then(function (data) {
+              const name = data.name;
+              const _id = data._id.toString();
+              const words = name.split(' ');
+              const _username =
+                words.length > 1 ? words[words.length - 1] : words[0]; //ten
+              let messages = [];
+              messages.push(
+                {
+                  role: 'system',
+                  content: `Tôi tên là ${_username}. Bạn tên là EmotiBot, một trợ lý ảo của nền tảng AI-Care và là một nhà chuyên gia tư vấn tâm lý, bạn sẽ giúp đỡ tôi về vấn đề tâm lý, bạn có thể ghi nhớ tên tôi và các câu chuyện để đưa ra lời khuyên.`,
+                },
+
+                {
+                  role: 'user',
+                  content: `Tôi tên là ${_username} (hãy ghi nhớ tên của tôi, tên của bạn và nội dung tôi chia sẻ về sau, Hãy trò chuyện với tôi bằng tên của tôi và tên của bạn là Emotibot và khi được hỏi những câu "Tôi tên là gì?/ Bạn còn nhớ tên tôi không?/ Bạn có biết tên tôi là gì không?" thì hãy chỉ trả lời "Tên của bạn là ${_username}". Khi tôi hỏi "Tên của bạn là gì? Bạn tên gì? Bạn là ai?" hãy trả lời "Tôi là EmotiBot, một trợ lý ảo của nền tảng AI-Care " bạn có thể tư vấn tâm lý và giúp đỡ những người đang gặp vấn đề về tâm lý `,
+                },
+                {
+                  role: 'assistant',
+                  content: `Dạ, tôi sẽ ghi nhớ tên của bạn là ${_username} và nội dung các câu chuyện bạn chia sẻ để có thể tư vấn tâm lý và đưa ra lời khuyên hữu ích cho bạn. Khi bạn hỏi tôi về tên của mình, tôi sẽ trả lời là "Tôi là EmotiBot, một trợ lý ảo của nền tảng AI-Care". `,
+                }
+              );
+              const hisstory = History.create({
+                messages: messages,
+                user: _id,
+              });
+              hisstory.then(function () {
+                res.status(200).send({ success: true });
+              });
             })
             .catch(function (error) {
               console.log(hashedPassword);
