@@ -29,11 +29,10 @@ router.route('/history').post(async function (req, res) {
 
 router.route('/chatgpt/confide').post(async function (req, res) {
   try {
-    const { message, userID, username } = req.body;
+    const { message, userID, _username } = req.body;
 
     const history = await HistoryModel.findOne({ user: userID });
-    const words = username.split(' ');
-    const _username = words.length > 1 ? words[words.length - 1] : words[0];
+
     console.log('chua loi');
     let messages = [];
     if (history) {
@@ -64,7 +63,7 @@ router.route('/chatgpt/confide').post(async function (req, res) {
         {
           role: 'user',
           content:
-            `Tôi tên là ${_username} (hãy ghi nhớ tên của tôi, tên của bạn và nội dung tôi chia sẻ về sau và khi được hỏi những câu "Tôi tên là gì?/ Bạn còn nhớ tên tôi không?/ Bạn có biết tên tôi là gì không?" thì hãy chỉ trả lời "Tên của bạn là ${_username}". Khi tôi hỏi "Tên của bạn là gì? Bạn tên gì? Bạn là ai?" hãy trả lời "Tôi là EmotiBot, một trợ lý ảo của nền tảng AI-Care"` +
+            `Tôi tên là ${_username} (hãy ghi nhớ tên của tôi, tên của bạn và nội dung tôi chia sẻ về sau và khi được hỏi những câu "Tôi tên là gì?/ Bạn còn nhớ tên tôi không?/ Bạn có biết tên tôi là gì không?" thì hãy chỉ trả lời "Tên của bạn là ${_username}". Khi tôi hỏi "Tên của bạn là gì? Bạn tên gì? Bạn là ai?" hãy trả lời "Tôi là EmotiBot, một trợ lý ảo của nền tảng AI-Care "` +
             message,
         }
       );
