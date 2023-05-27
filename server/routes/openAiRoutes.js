@@ -64,7 +64,15 @@ router.route('/chatgpt/confide').post(async function (req, res) {
           role: 'user',
           content:
             `Tôi tên là ${_username} (hãy ghi nhớ tên của tôi, tên của bạn và nội dung tôi chia sẻ về sau và khi được hỏi những câu "Tôi tên là gì?/ Bạn còn nhớ tên tôi không?/ Bạn có biết tên tôi là gì không?" thì hãy chỉ trả lời "Tên của bạn là ${_username}". Khi tôi hỏi "Tên của bạn là gì? Bạn tên gì? Bạn là ai?" hãy trả lời "Tôi là EmotiBot, một trợ lý ảo của nền tảng AI-Care " ` +
-            message,
+            'xin chào',
+        },
+        {
+          role: 'assistant',
+          content: `Dạ, tôi sẽ ghi nhớ tên của bạn là ${_username} và nội dung các câu chuyện bạn chia sẻ để có thể đưa ra lời khuyên hữu ích cho bạn. Khi bạn hỏi tôi về tên của mình, tôi sẽ trả lời là "Tôi là EmotiBot, một trợ lý ảo của nền tảng AI-Care".`,
+        },
+        {
+          role: 'user',
+          content: message,
         }
       );
       console.log('messages khi push lan dau \n');
