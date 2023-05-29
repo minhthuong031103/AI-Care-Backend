@@ -19,8 +19,9 @@ app.use(express.json({ limit: '50mb' }));
 
 app.use('/user', userRoutes);
 app.use('/api', openAiRoutes);
+app.use('/api/dalle', openAiRoutes);
 app.use('/doctor', doctorRoutes);
-app.use('/api/v1/post', postRoutes);
+app.use('/api/post', postRoutes);
 app.get('/', async function (req, res) {
   return res.send('hello world');
 });
