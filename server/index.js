@@ -7,6 +7,7 @@ import bodyParser from 'body-parser';
 import openAiRoutes from './routes/openAiRoutes.js';
 import userRoutes from './routes/userRoute.js';
 import doctorRoutes from './routes/doctorRoute.js';
+import postRoutes from './routes/postRoutes.js';
 dotenv.config();
 
 const app = express();
@@ -19,6 +20,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use('/user', userRoutes);
 app.use('/api', openAiRoutes);
 app.use('/doctor', doctorRoutes);
+app.use('/api/v1/post', postRoutes);
 app.get('/', async function (req, res) {
   return res.send('hello world');
 });
