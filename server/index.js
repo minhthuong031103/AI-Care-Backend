@@ -22,7 +22,7 @@ app.use('/user', userRoutes);
 app.use('/api', openAiRoutes);
 app.use('/api/dalle', dalleRoutes);
 app.use('/doctor', doctorRoutes);
-app.use('/api/post', postRoutes);
+app.use('/api/v1/post', postRoutes);
 app.get('/', async function (req, res) {
   return res.send('hello world');
 });
