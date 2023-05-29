@@ -8,6 +8,7 @@ import openAiRoutes from './routes/openAiRoutes.js';
 import userRoutes from './routes/userRoute.js';
 import doctorRoutes from './routes/doctorRoute.js';
 import postRoutes from './routes/postRoutes.js';
+import dalleRoutes from './routes/dalleRoutes.js';
 dotenv.config();
 
 const app = express();
@@ -19,7 +20,7 @@ app.use(express.json({ limit: '50mb' }));
 
 app.use('/user', userRoutes);
 app.use('/api', openAiRoutes);
-app.use('/api/dalle', openAiRoutes);
+app.use('/api/dalle', dalleRoutes);
 app.use('/doctor', doctorRoutes);
 app.use('/api/post', postRoutes);
 app.get('/', async function (req, res) {
