@@ -38,20 +38,13 @@ router.route('/chatgpt/confide').post(async function (req, res) {
     if (history) {
       const { _id, ...messagesObject } = history.messages;
       messages = Object.values(messagesObject);
-      //Lay 6 cau cuoi
-      // messages = messages.slice(-6);
 
-      // Lay 3 cau dau 3 cau cuoi
       const firstThreeMessages = messages.slice(0, 3);
-      console.log('messages tu db');
-      console.log(messages);
 
       messages.push({
         role: 'user',
         content: '' + message,
       });
-      console.log('messages sau khi lay ve tu db va push \n');
-      console.log(messages);
     }
 
     const completion = await openAI.post(
