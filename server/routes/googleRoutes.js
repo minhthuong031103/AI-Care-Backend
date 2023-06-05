@@ -48,7 +48,7 @@ router.get('/success', async (req, res) => {
       maxAge: expirationTime,
     });
 
-    return res.redirect('https://ai-care.onrender.com/');
+    return res.redirect('https://ai-care-uit.vercel.app/');
   }
   console.log('Registering new Google user..');
   const expirationTime = 60 * 1000; // 1 minute in milliseconds
@@ -56,7 +56,7 @@ router.get('/success', async (req, res) => {
     maxAge: expirationTime,
   });
 
-  return res.redirect('https://ai-care.onrender.com'); // Redirect to the client URL
+  return res.redirect('https://ai-care-uit.vercel.app/register'); // Redirect to the client URL
 });
 
 router.get('/error', (req, res) => res.send('Error logging in via Google..'));
