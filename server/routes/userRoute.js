@@ -185,31 +185,6 @@ router.route('/updateuser').put(async function updateUser(req, res) {
   } catch (error) {
     console.log(error);
     return res.status(503).send({ error });
-    // .then(function () {
-    //   bcrypt.hash(password, 10).then(async function (hashedPassword) {
-    //     const newUser = await User.create({
-    //       name,
-    //       email,
-    //       phone,
-    //       password: hashedPassword,
-    //     })
-    //       .then(function () {
-    //         res.status(200).send({ success: true });
-    //       })
-    //       .catch(function (error) {
-    //         console.log(hashedPassword);
-    //         console.log(error);
-    //         res.status(500).send(error);
-    //       });
-    //   });
-    // })
-    // .catch(function (error) {
-    //   if (error === 'Email already exists') {
-    //     return res.status(201).send('Email exist');
-    //   } else if (error === 'Phone already exists') {
-    //     return res.status(202).send('Phone exist');
-    //   }
-    // });
   }
 });
 
