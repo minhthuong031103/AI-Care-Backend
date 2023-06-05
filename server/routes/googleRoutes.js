@@ -43,22 +43,21 @@ router.get('/success', async (req, res) => {
   console.log(userProfile);
   const { login, register } = await googleAuth.registerWithGoogle(userProfile);
   if (login) {
-    const expirationTime = 30 * 1000; // 0.5 minute in milliseconds
-    res.cookie('responseData', JSON.stringify(login), {
-      maxAge: expirationTime,
-      secure: true,
-    });
+    const responseData = JSON.stringify(login);
 
-    return res.redirect('https://ai-care-uit.vercel.app/');
+    const redirectUrl =
+      'https://ai-care-uit.vercel.app/?responseData=' +
+      encodeURIComponent(responseData);
+    return res.redirect(302, redirectUrl);
   }
   console.log('Registering new Google user..');
-  const expirationTime = 60 * 1000; // 1 minute in milliseconds
-  res.cookie('responseData', JSON.stringify(register), {
-    maxAge: expirationTime,
-    secure: true,
-  });
+  const responseData = JSON.stringify(register);
 
-  return res.redirect('https://ai-care-uit.vercel.app/register'); // Redirect to the client URL
+  const redirectUrl =
+    'https://ai-care-uit.vercel.app/register?responseData=' +
+    encodeURIComponent(responseData);
+
+  return res.redirect(302, redirectUrl);
 });
 
 router.get('/error', (req, res) => res.send('Error logging in via Google..'));
