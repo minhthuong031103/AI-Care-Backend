@@ -46,6 +46,7 @@ router.get('/success', async (req, res) => {
     const expirationTime = 30 * 1000; // 0.5 minute in milliseconds
     res.cookie('responseData', JSON.stringify(login), {
       maxAge: expirationTime,
+      secure: true,
     });
 
     return res.redirect('https://ai-care-uit.vercel.app/');
@@ -54,6 +55,7 @@ router.get('/success', async (req, res) => {
   const expirationTime = 60 * 1000; // 1 minute in milliseconds
   res.cookie('responseData', JSON.stringify(register), {
     maxAge: expirationTime,
+    secure: true,
   });
 
   return res.redirect('https://ai-care-uit.vercel.app/register'); // Redirect to the client URL
