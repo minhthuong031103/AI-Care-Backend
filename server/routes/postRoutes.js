@@ -15,7 +15,7 @@ cloudinary.config({
 router.route('/allofuser').post(async function (req, res) {
   try {
     console.log(req.body);
-    const { _id } = req.body;
+    const _id = '647945c1b4f6d8c5cb9f153f';
     const posts = await Post.find({ _userid: _id });
     res.status(200).json({ success: true, data: posts });
   } catch (error) {
